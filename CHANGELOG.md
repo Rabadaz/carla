@@ -1,5 +1,8 @@
 ## Latest Changes
+
+ * Added NVIDIA Neural Reconstruction Engine (NuRec) integration
  * Added the SimReady OpenUSD and MDL Converters to provide export and import support for SimReady OpenUSD stages and MDL materials.
+ * Added support for left-handed traffic maps
  * Renamed Ubuntu 18-based Dockerfile to CarlaLegacy for clarity
  * Created documentation for using devcontainers
  * Ensured CARLA scripts consistently use python3
@@ -44,6 +47,8 @@
  * Support of masked materials in instance segmentation, resulting in fine-grained annotations on e.g. leaves or fences (as in semantic segmentation)
  * Added API function `world.set_annotations_traverse_translucency` and implemented functionality to configure, whether depth and semantic + instance segmentation traverse translucent materials or not.
  * Fixed `frame`, `timestamp` and `transform` of `SensorData` not matching to the actually sent image for camera sensors.
+ * Added  "geolocation_to_transform" function to the Map object in the PythonAPI
+ * Add support for NVIDIA NuRec 25.07 (CARLA-NuRec 0.2)
 
 ## CARLA 0.9.15
 

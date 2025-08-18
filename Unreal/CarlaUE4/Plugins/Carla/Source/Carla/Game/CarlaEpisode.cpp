@@ -61,6 +61,23 @@ UCarlaEpisode::UCarlaEpisode(const FObjectInitializer &ObjectInitializer)
   FrameData.SetEpisode(this);
 }
 
+void UCarlaEpisode::BeginDestroy()
+{
+  Super::BeginDestroy();
+
+  // stop recorder and replayer
+  if (Recorder)
+  {
+    Recorder->Stop();
+    if (Recorder->GetReplayer()->IsEnabled())
+    {
+      Recorder->GetReplayer()->Stop();
+    }
+  }
+
+  FPlatformProcess::CloseProc(RecastBuilderProcessHandle);
+}
+
 bool UCarlaEpisode::LoadNewEpisode(const FString &MapString, bool ResetSettings)
 {
   bool bIsFileFound = false;
@@ -193,9 +210,20 @@ bool UCarlaEpisode::LoadNewOpendriveEpisode(
   if (FPaths::FileExists(AbsoluteRecastBuilderPath) &&
       Params.enable_pedestrian_navigation)
   {
+    if(FPlatformProcess::IsProcRunning(RecastBuilderProcessHandle))
+    {
+      UE_LOG(LogCarla, Warning, TEXT("RecastBuilder process is already running, "
+          "it will be replaced with the new one."));
+      FPlatformProcess::CloseProc(RecastBuilderProcessHandle);
+    }
+    else
+    {
+      UE_LOG(LogCarla, Log, TEXT("Starting RecastBuilder process..."));
+    }
+
     /// @todo this can take too long to finish, clients need a method
     /// to know if the navigation is available or not.
-    FPlatformProcess::CreateProc(
+    RecastBuilderProcessHandle = FPlatformProcess::CreateProc(
         *AbsoluteRecastBuilderPath, *AbsoluteOBJPath,
         true, true, true, nullptr, 0, nullptr, nullptr);
   }

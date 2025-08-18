@@ -789,7 +789,7 @@ void FCarlaServer::FPimpl::BindActions()
           if (Attr.Key == "ros_name")
           {
             const std::string value = std::string(TCHAR_TO_UTF8(*Attr.Value.Value));
-            ROS2->AddActorParentRosName(static_cast<void*>(CarlaActor->GetActor()), static_cast<void*>(CurrentActor->GetActor()));
+            ROS2->RegisterActorParent(static_cast<void*>(CarlaActor->GetActor()), static_cast<void*>(CurrentActor->GetActor()));
           }
         }
         CurrentActor = Episode->FindCarlaActor(CurrentActor->GetParent());
@@ -2827,6 +2827,69 @@ BIND_SYNC(is_sensor_enabled_for_ros) << [this](carla::streaming::detail::stream_
     }
   };
 
+  BIND_SYNC(enable_gbuffers) << [this](const cr::ActorId ActorId, bool bEnabled) -> R<void>
+  {
+      REQUIRE_CARLA_EPISODE();
+      FCarlaActor* CarlaActor = Episode->FindCarlaActor(ActorId);
+      if(!CarlaActor)
+      {
+        return RespondError(
+            "enable_gbuffers",
+            ECarlaServerResponse::ActorNotFound,
+            " Actor Id: " + FString::FromInt(ActorId));
+      }
+      if (CarlaActor->IsDormant())
+      {
+        return RespondError(
+            "enable_gbuffers",
+            ECarlaServerResponse::FunctionNotAvailiableWhenDormant,
+            " Actor Id: " + FString::FromInt(ActorId));
+      }
+      ASceneCaptureSensor* Sensor = Cast<ASceneCaptureSensor>(CarlaActor->GetActor());
+      if (!Sensor)
+      {
+        return RespondError(
+          "enable_gbuffers",
+          ECarlaServerResponse::ActorTypeMismatch,
+          " Actor Id: " + FString::FromInt(ActorId));
+      }
+
+      Sensor->EnableGBuffers(bEnabled);
+      
+      return R<void>::Success();
+
+  };
+
+  BIND_SYNC(are_gbuffers_enabled) << [this](const cr::ActorId ActorId) -> R<bool>
+  {
+    REQUIRE_CARLA_EPISODE();
+    FCarlaActor* CarlaActor = Episode->FindCarlaActor(ActorId);
+    if(!CarlaActor)
+    {
+      return RespondError(
+          "enable_gbuffers",
+          ECarlaServerResponse::ActorNotFound,
+          " Actor Id: " + FString::FromInt(ActorId));
+    }
+    if (CarlaActor->IsDormant())
+    {
+      return RespondError(
+          "enable_gbuffers",
+          ECarlaServerResponse::FunctionNotAvailiableWhenDormant,
+          " Actor Id: " + FString::FromInt(ActorId));
+    }
+    ASceneCaptureSensor* Sensor = Cast<ASceneCaptureSensor>(CarlaActor->GetActor());
+    if (!Sensor)
+    {
+      return RespondError(
+        "enable_gbuffers",
+        ECarlaServerResponse::ActorTypeMismatch,
+        " Actor Id: " + FString::FromInt(ActorId));
+    }
+
+    return R<bool>(Sensor->AreGBuffersEnabled());
+  };
+
   // ~~ Logging and playback ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   BIND_SYNC(start_recorder) << [this](std::string name, bool AdditionalData) -> R<std::string>
@@ -2881,7 +2944,8 @@ BIND_SYNC(is_sensor_enabled_for_ros) << [this](carla::streaming::detail::stream_
       double start,
       double duration,
       uint32_t follow_id,
-      bool replay_sensors) -> R<std::string>
+      bool replay_sensors,
+      const cr::Transform offset) -> R<std::string>
   {
     REQUIRE_CARLA_EPISODE();
     return R<std::string>(Episode->GetRecorder()->ReplayFile(
@@ -2889,6 +2953,7 @@ BIND_SYNC(is_sensor_enabled_for_ros) << [this](carla::streaming::detail::stream_
         start,
         duration,
         follow_id,
+        offset,
         replay_sensors));
   };
 

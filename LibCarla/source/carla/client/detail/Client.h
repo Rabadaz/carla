@@ -408,7 +408,7 @@ namespace detail {
     std::string ShowRecorderActorsBlocked(std::string name, double min_time, double min_distance);
 
     std::string ReplayFile(std::string name, double start, double duration,
-        uint32_t follow_id, bool replay_sensors);
+        uint32_t follow_id, bool replay_sensors, geom::Transform offset);
 
     void SetReplayerTimeFactor(double time_factor);
 
@@ -421,6 +421,10 @@ namespace detail {
     void SubscribeToStream(
         const streaming::Token &token,
         std::function<void(Buffer)> callback);
+
+    void EnableGBuffers(rpc::ActorId ActorId, bool bEnabled);
+    
+    bool AreGBuffersEnabled(rpc::ActorId ActorId);
 
     void SubscribeToGBuffer(
         rpc::ActorId ActorId,

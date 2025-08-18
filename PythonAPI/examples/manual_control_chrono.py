@@ -89,6 +89,7 @@ import math
 import random
 import re
 import weakref
+from pathlib import Path
 
 try:
     import pygame
@@ -399,7 +400,7 @@ class KeyboardControl(object):
                         world.recording_enabled = False
                         world.hud.notification("Recorder is OFF")
                     else:
-                        client.start_recorder("manual_recording.rec")
+                        client.start_recorder("manual_recording.log")
                         world.recording_enabled = True
                         world.hud.notification("Recorder is ON")
                 elif event.key == K_p and (pygame.key.get_mods() & KMOD_CTRL):
@@ -412,9 +413,9 @@ class KeyboardControl(object):
                     # disable autopilot
                     self._autopilot_enabled = False
                     world.player.set_autopilot(self._autopilot_enabled)
-                    world.hud.notification("Replaying file 'manual_recording.rec'")
+                    world.hud.notification("Replaying file 'manual_recording.log'")
                     # replayer
-                    client.replay_file("manual_recording.rec", world.recording_start, 0, 0)
+                    client.replay_file("manual_recording.log", world.recording_start, 0, 0)
                     world.camera_manager.set_sensor(current_index)
                 elif event.key == K_k and (pygame.key.get_mods() & KMOD_CTRL):
                     print("k pressed")
@@ -431,7 +432,7 @@ class KeyboardControl(object):
                         vehicle_json = "sedan/vehicle/Sedan_Vehicle.json"
                         powertrain_json = "sedan/powertrain/Sedan_SimpleMapPowertrain.json"
                         tire_json = "sedan/tire/Sedan_TMeasyTire.json"
-                        base_path = "/home/adas/carla/Build/chrono-install/share/chrono/data/vehicle/"
+                        base_path = str(Path(__file__).resolve().parents[2] / "Co-Simulation" / "Chrono" / "Vehicles") + os.sep
                         world.player.enable_chrono_physics(5000, 0.002, vehicle_json, powertrain_json, tire_json, base_path)
                     else:
                         self._chrono_enabled = False
