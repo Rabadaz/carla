@@ -65,7 +65,8 @@ fi
 
 # -- INSTALL PYTHON PACKAGES --
 echo "Installing Python Packages..."
-$python_path -m pip install --upgrade pip
+# I don't want to upgrade pip when installing carla globally
+#$python_path -m pip install --upgrade pip
 $python_path -m pip install -r requirements.txt
 
 # -- INSTALL CMAKE --

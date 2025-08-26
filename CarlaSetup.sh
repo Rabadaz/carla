@@ -2,7 +2,7 @@
 
 set -e
 
-interactive=0
+interactive=1
 skip_prerequisites=0
 launch=0
 python_root=
@@ -57,17 +57,19 @@ if [ "$EUID" -ne 0 ]; then
     fi
 fi
 
+# Not needed because the carla and unreal repos belong to the same user
+
 # Check for Git credentials:
-if [ -z "$GIT_LOCAL_CREDENTIALS" ]; then
-    if [ $interactive -eq 1 ]; then
-        echo "Warning: git credentials are not set. You may be required to manually enter them later."
-    else
-        echo "Git credentials are not set, can not continue setup in unattended mode."
-        exit 1
-    fi
-else
-    echo "Found git credentials."
-fi
+#if [ -z "$GIT_LOCAL_CREDENTIALS" ]; then
+#    if [ $interactive -eq 1 ]; then
+#        echo "Warning: git credentials are not set. You may be required to manually enter them later."
+#    else
+#        echo "Git credentials are not set, can not continue setup in unattended mode."
+#        exit 1
+#    fi
+#else
+#    echo "Found git credentials."
+#fi
 
 # -- PREREQUISITES INSTALL STEP --
 if [ $skip_prerequisites -eq 0 ]; then
@@ -103,18 +105,26 @@ elif [ -d ../UnrealEngine5_carla ]; then
 else
     echo "Could not find CARLA Unreal Engine, downloading..."
     pushd ..
-    if [ -z "$GIT_LOCAL_CREDENTIALS" ]
-    then
-        UE5_URL=https://github.com/CarlaUnreal/UnrealEngine.git
-    else
-        GIT_CREDENTIALS_INFO=(${GIT_LOCAL_CREDENTIALS//@/ })
-        GIT_LOCAL_USER=${GIT_CREDENTIALS_INFO[0]}
-        GIT_LOCAL_TOKEN=${GIT_CREDENTIALS_INFO[1]}
-        UE5_URL=https://$GIT_LOCAL_USER:$GIT_LOCAL_TOKEN@github.com/CarlaUnreal/UnrealEngine.git
-    fi
+    #if [ -z "$GIT_LOCAL_CREDENTIALS" ]
+    #then
+
+    UE5_URL=git@github.com:Rabadaz/UnrealEngine_carla.git
+
+    #else
+    #    GIT_CREDENTIALS_INFO=(${GIT_LOCAL_CREDENTIALS//@/ })
+    #    GIT_LOCAL_USER=${GIT_CREDENTIALS_INFO[0]}
+    #    GIT_LOCAL_TOKEN=${GIT_CREDENTIALS_INFO[1]}
+    #    UE5_URL=https://$GIT_LOCAL_USER:$GIT_LOCAL_TOKEN@github.com/CarlaUnreal/UnrealEngine.git
+    #fi
+    
     git clone -b ue5-dev-carla $UE5_URL UnrealEngine5_carla
     pushd UnrealEngine5_carla
-    echo -e '\n#CARLA UnrealEngine5\nexport CARLA_UNREAL_ENGINE_PATH='$PWD >> ~/.bashrc
+    #I do not want to have the carla engine path in bashrc because i want to use multiple versions
+    #echo -e '\n#CARLA UnrealEngine5\nexport CARLA_UNREAL_ENGINE_PATH='$PWD >> ~/.bashrc
+    
+    # Create a file to source to use Carla
+    touch setupCarlaPath.sh
+    echo -e '\n#CARLA UnrealEngine5\nexport CARLA_UNREAL_ENGINE_PATH='$PWD >> ./setupCarlaPath.sh
     export CARLA_UNREAL_ENGINE_PATH=$PWD
     echo "Running Unreal Engine pre-build steps..."
     bash -x Setup.sh
