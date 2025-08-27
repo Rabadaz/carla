@@ -124,7 +124,7 @@ else
     
     # Create a file to source to use Carla
     touch setupCarlaPath.sh
-    echo -e '\n#CARLA UnrealEngine5\nexport CARLA_UNREAL_ENGINE_PATH='$PWD >> ./setupCarlaPath.sh
+    echo -e '\n#CARLA UnrealEngine5\nexport CARLA_UNREAL_ENGINE_PATH='$PWD >> ../setupCarlaPath.sh
     export CARLA_UNREAL_ENGINE_PATH=$PWD
     echo "Running Unreal Engine pre-build steps..."
     bash -x Setup.sh
