@@ -12,6 +12,13 @@
 
 #include <memory>
 
+#include <cstdlib> 
+
+//FIXME: properly fix this missing function
+extern "C" long __isoc23_strtol(const char* nptr, char** endptr, int base){
+  return strtol(nptr, endptr, base);
+}
+
 namespace carla {
 namespace streaming {
 namespace detail {
